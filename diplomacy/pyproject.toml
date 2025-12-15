@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=61.0.0"] # Minimum version that supports `pyproject.toml`
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diplomacy"
+description = "Diplomacy: DATC-Compliant Game Engine with Web Interface"
+readme = "README.md"
+authors = [
+  { name = "Philip Paquette", email = "pcpaquette@gmail.com" },
+]
+keywords = [
+  "diplomacy",
+  "diplomacy-game",
+  "game",
+  "negotiation",
+]
+classifiers = [
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Games/Entertainment",
+  "Topic :: Games/Entertainment :: Board Games",
+]
+requires-python = ">=3.7"
+license = { text = "AGPL-3.0-or-later" }
+dependencies = [
+  "bcrypt",
+  "requests",
+  "tornado>=5.0",
+  "tqdm",
+  "ujson",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+  "pre-commit",
+  "pylint>=2.3.0",
+  # `pytest` `6.0` introduced `--strict-config` argument and `pyproject.toml` support
+  "pytest>=6.0",
+  "pytest-xdist",
+  "sphinx",
+  "sphinx_copybutton",
+  "sphinx_rtd_theme",
+]
+
+[project.urls]
+documentation = "https://diplomacy.readthedocs.io"
+homepage = "https://github.com/diplomacy/diplomacy"
+issues = "https://github.com/diplomacy/diplomacy/issues"
+source = "https://github.com/diplomacy/diplomacy"
+
+[tool.setuptools]
+packages = ["diplomacy"]
+
+[tool.setuptools.dynamic]
+version = {attr = "diplomacy.version.PACKAGE_VERSION"}
+
+[tool.black]
+line-length = 100
+
+[tool.codespell]
+ignore-regex = "\\[nt]" # Do not count escaped newlines or tabs as part of a word
+# `astroid` is a dependency of pylint
+# "consequentially" is used in the DATC and copied as part of a comment
+# "HEL", "KET", "LOD", "MIS", "SER", "THN", and "VIE" are from DAIDE
+ignore-words-list = "astroid,consequentially,hel,ket,lod,mis,ser,thn,vie"
+quiet-level = 0 # Display all warnings
+check-filenames = ""
+check-hidden = ""
+
+[tool.pytest.ini_options]
+addopts = "--verbosity=1 -ra --strict-config --strict-markers --ignore=diplomacy/web/src/diplomacy/maps/tests/ --numprocesses auto"
+filterwarnings = [
+  "error",
+  # The `make_current` parameter for `IOLoop` was deprecated in `tornado`
+  # in `6.2.0` (the last version to support Python 3.7) but was undeprecated in `6.3.0`.
+  # This specific `DeprecationWarning` needs to be disabled to prevent test failures
+  # in the Python 3.7 CI.
+  "ignore:make_current is deprecated; start the event loop first:DeprecationWarning",
+  # TODO: Fix warning that shows up in Python 3.11 but not 3.7
+  # See https://docs.pytest.org/en/8.3.x/how-to/failures.html#warning-about-unraisable-exceptions-and-unhandled-thread-exceptions
+  "ignore::pytest.PytestUnraisableExceptionWarning",
+]
+log_cli_level = "INFO"
+minversion = "6.0"
+xfail_strict = true
